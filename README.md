@@ -1,2 +1,2 @@
-# RepoB
-Child repository
+# RepoA
+Base repository

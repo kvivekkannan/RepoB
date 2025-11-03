@@ -1,0 +1,2 @@
+# RepoB
+Child repository
