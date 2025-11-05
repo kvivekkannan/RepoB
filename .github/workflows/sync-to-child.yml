@@ -1,0 +1,40 @@
+name: Sync RepoA to RepoB
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Parent Repo (RepoA)
+        uses: actions/checkout@v4 
+
+      - name: Configure Git for Parent Repo
+        run: |
+          git config user.name "kvivekkannan"
+          git config user.email "kviveknishanth@gmail.com"
+
+      - name: Clone ChildRepo (RepoB)
+        env:
+          REPOB_REPO_SECRET: ${{ secrets.REPOB_REPO_SECRET }}
+        run: |
+          git clone https://x-access-token:${REPOB_REPO_SECRET}@github.com/kvivekkannan/RepoB.git repob
+          cd repob
+          git checkout sync || git checkout -b sync
+          git config user.name "kvivekkannan"
+          git config user.email "kviveknishanth@gmail.com"
+
+      - name: Sync files to ChildRepo
+        run: |
+          rsync -av --delete --exclude '.git' ./ ./repob/
+
+      - name: Commit and Push Changes
+        working-directory: ./repob
+        run: |
+          git add .
+          git commit -m "🔄 Sync changes from RepoA on $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+          git push origin sync
